@@ -1,0 +1,6 @@
+medico_env/
+__pycache__/
+*.pyc
+.env
+database/*.sqlite3
+*.log
