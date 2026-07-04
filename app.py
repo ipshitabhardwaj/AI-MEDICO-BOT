@@ -16,7 +16,7 @@ Features
 • Questions for Doctor
 • Retrieved Context Viewer
 
-Author : Himanshu Rajak
+Author : Ipshita Bhardwaj
 =========================================================
 """
 
@@ -60,50 +60,135 @@ st.set_page_config(
 )
 
 # =========================================================
-# Custom CSS
+# Visual identity — "The Chart"
+# A clinical-report aesthetic: sections read like panels
+# of a diagnostic chart, values read like lab readouts.
 # =========================================================
 
 st.markdown(
     """
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* Main App */
-.stApp{
-    background-color:#F8FAFC;
+:root {
+    --paper: #F5F4EF;
+    --panel: #FFFFFF;
+    --ink: #1E2730;
+    --ink-soft: #5B6570;
+    --clinical: #0F6E5C;
+    --clinical-deep: #0A4B3E;
+    --amber: #B4802E;
+    --note: #A0443A;
+    --line: #DDD9CC;
 }
 
-/* Main Title */
-.main-title{
-    text-align:center;
-    font-size:42px;
-    font-weight:700;
-    color:#1565C0;
+.stApp { background: var(--paper); color: var(--ink); font-family: 'Inter', sans-serif; }
+h1, h2, h3 { font-family: 'Source Serif 4', serif !important; color: var(--clinical-deep) !important; }
+
+/* header */
+.chart-header {
+    padding: 0.3rem 0 1rem 0;
+    border-bottom: 2px solid var(--clinical-deep);
+    margin-bottom: 1.4rem;
+}
+.chart-header .chart-title {
+    font-family: 'Source Serif 4', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--clinical-deep);
+}
+.chart-header .chart-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 0.2rem;
 }
 
-/* Subtitle */
-.subtitle{
-    text-align:center;
-    color:#555555;
-    font-size:18px;
-    margin-bottom:20px;
+/* panel label — used instead of st.subheader for section identity */
+.panel-tab {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--clinical-deep);
+    background: #E4EFEA;
+    border: 1px solid var(--clinical);
+    border-radius: 2px;
+    padding: 0.15rem 0.55rem;
+    margin-bottom: 0.5rem;
+}
+.panel-caption { color: var(--ink-soft); font-size: 0.9rem; margin-bottom: 0.8rem; }
+
+/* sidebar */
+[data-testid="stSidebar"] { background: var(--clinical-deep); }
+[data-testid="stSidebar"] * { color: #F2F0E6 !important; }
+[data-testid="stSidebar"] hr { border-color: rgba(242,240,230,0.15); }
+[data-testid="stSidebar"] .stFileUploader section { background: #F2F0E6; border-radius: 3px; }
+[data-testid="stSidebar"] .stFileUploader section * { color: var(--ink) !important; }
+[data-testid="stSidebar"] [data-baseweb="select"] > div { background: #F2F0E6 !important; color: var(--ink) !important; border-radius: 3px; }
+[data-testid="stSidebar"] [data-baseweb="select"] * { color: var(--ink) !important; }
+
+/* buttons */
+.stButton > button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    border: 1px solid var(--clinical);
+    background: var(--panel);
+    color: var(--clinical-deep);
+    padding: 0.55rem 1rem;
+}
+.stButton > button:hover { background: var(--clinical-deep); color: #F2F0E6; border-color: var(--clinical-deep); }
+[data-testid="stSidebar"] .stButton:nth-of-type(1) button {
+    background: #D9C79E; color: var(--clinical-deep); border-color: #D9C79E; font-weight: 600;
+}
+[data-testid="stSidebar"] .stButton:nth-of-type(3) button {
+    background: transparent; border: 1px dashed rgba(242,240,230,0.4);
 }
 
-/* Card */
-.card{
-    background:white;
-    padding:18px;
-    border-radius:12px;
-    border:1px solid #E0E0E0;
-    box-shadow:0px 2px 8px rgba(0,0,0,0.08);
+/* metrics as lab readouts */
+[data-testid="stMetric"] {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 3px;
+    padding: 0.65rem 0.8rem 0.5rem 0.8rem;
+}
+[data-testid="stMetricLabel"] {
+    font-family: 'JetBrains Mono', monospace !important; font-size: 0.66rem !important;
+    letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft) !important;
+}
+[data-testid="stMetricValue"] { font-family: 'JetBrains Mono', monospace !important; color: var(--clinical-deep) !important; }
+
+/* info panels -> chart notes, not default blue boxes */
+[data-testid="stAlertContentInfo"] {
+    background: var(--panel) !important; border: 1px solid var(--line) !important;
+    border-left: 3px solid var(--clinical) !important; border-radius: 2px !important; color: var(--ink) !important;
 }
 
-/* Footer */
-.footer{
-    text-align:center;
-    color:gray;
-    font-size:14px;
+/* the medical disclaimer -> a chart annotation, not a shouting warning box */
+[data-testid="stAlertContentWarning"] {
+    background: var(--panel) !important; border: 1px solid var(--line) !important;
+    border-left: 4px solid var(--note) !important; border-radius: 2px !important; color: var(--ink) !important;
 }
 
+/* expander = exhibit card */
+[data-testid="stExpander"] { border: 1px solid var(--line) !important; border-radius: 3px !important; background: var(--panel) !important; }
+[data-testid="stExpander"] summary { font-family: 'JetBrains Mono', monospace !important; font-size: 0.8rem !important; color: var(--clinical-deep) !important; }
+
+/* source page refs */
+.ref-row { margin-top: 0.5rem; }
+.ref-chip {
+    display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    color: var(--clinical-deep); border: 1.3px solid var(--clinical); border-radius: 3px;
+    padding: 0.15rem 0.5rem; margin: 0 0.3rem 0.3rem 0;
+}
+
+/* colophon */
+.colophon { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    color: var(--ink-soft); padding: 1rem 0 0.4rem 0; letter-spacing: 0.03em; }
 </style>
 """,
     unsafe_allow_html=True
@@ -115,90 +200,47 @@ st.markdown(
 
 st.markdown(
     """
-<div class="main-title">
-
-🩺 AI Medico Bot
-
+<div class="chart-header">
+    <div class="chart-title">AI Medico Bot</div>
+    <div class="chart-sub">Medical Report Assistant · LangChain · Gemini · Ollama · FAISS / ChromaDB</div>
 </div>
 """,
     unsafe_allow_html=True
 )
-
-st.markdown(
-    """
-<div class="subtitle">
-
-Intelligent Medical Report Assistant powered by
-
-<b>LangChain • Google Gemini • Ollama • FAISS • ChromaDB</b>
-
-</div>
-""",
-    unsafe_allow_html=True
-)
-
-st.divider()
-
 
 # =========================================================
 # Sidebar
 # =========================================================
 
-st.sidebar.title("⚙️ Configuration")
-
-st.sidebar.divider()
-
-# ---------------------------------------------------------
-# Upload Medical Report
-# ---------------------------------------------------------
+st.sidebar.markdown('<div class="panel-tab">Configuration</div>', unsafe_allow_html=True)
 
 uploaded_pdf = st.sidebar.file_uploader(
-    "📄 Upload Medical Report",
+    "Upload Medical Report",
     type=["pdf"]
 )
 
-# ---------------------------------------------------------
-# LLM Provider
-# ---------------------------------------------------------
-
 provider = st.sidebar.selectbox(
-    "🤖 LLM Provider",
+    "LLM Provider",
     LLMManager.available_providers()
 )
 
-# ---------------------------------------------------------
-# LLM Model
-# ---------------------------------------------------------
-
 model_name = st.sidebar.selectbox(
-    "🧠 Model",
+    "Model",
     LLMManager.available_models(provider)
 )
 
-# ---------------------------------------------------------
-# Vector Database
-# ---------------------------------------------------------
-
 vector_db = st.sidebar.selectbox(
-    "🗄️ Vector Database",
+    "Vector Database",
     [
         "FAISS",
         "ChromaDB"
     ]
 )
 
-# ---------------------------------------------------------
-# Embedding Model
-# ---------------------------------------------------------
-
 embedding_model = st.sidebar.selectbox(
-    "🧠 Embedding Model",
+    "Embedding Model",
     EmbeddingModel.available_models()
 )
-
-# ---------------------------------------------------------
-# Chunk Size
-# ---------------------------------------------------------
 
 chunk_size = st.sidebar.slider(
     "Chunk Size",
@@ -208,10 +250,6 @@ chunk_size = st.sidebar.slider(
     step=100
 )
 
-# ---------------------------------------------------------
-# Chunk Overlap
-# ---------------------------------------------------------
-
 chunk_overlap = st.sidebar.slider(
     "Chunk Overlap",
     min_value=0,
@@ -220,10 +258,6 @@ chunk_overlap = st.sidebar.slider(
     step=50
 )
 
-# ---------------------------------------------------------
-# Top K
-# ---------------------------------------------------------
-
 top_k = st.sidebar.slider(
     "Top K Retrieval",
     min_value=1,
@@ -231,48 +265,32 @@ top_k = st.sidebar.slider(
     value=3
 )
 
-st.sidebar.divider()
-
-# ---------------------------------------------------------
-# Buttons
-# ---------------------------------------------------------
+st.sidebar.markdown("<hr>", unsafe_allow_html=True)
 
 build_database = st.sidebar.button(
-    "🚀 Build Database",
+    "Build Database",
     use_container_width=True
 )
 
 clear_chat = st.sidebar.button(
-    "🧹 Clear Chat",
+    "Clear Chat",
     use_container_width=True
 )
 
 delete_database = st.sidebar.button(
-    "🗑 Delete Database",
+    "Delete Database",
     use_container_width=True
 )
 
-st.sidebar.divider()
+st.sidebar.markdown("<hr>", unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# Project Information
-# ---------------------------------------------------------
-
-st.sidebar.info(
+st.sidebar.markdown(
     """
-### 🩺 AI Medico Bot
+**AI Medico Bot** · v1.0
 
-**Version :** 1.0
+Supports Google Gemini, Ollama, FAISS, ChromaDB, and multiple embedding models.
 
-Supports:
-
-- Google Gemini
-- Ollama
-- FAISS
-- ChromaDB
-- Multiple Embedding Models
-
-Educational Use Only
+Educational use only.
 """
 )
 
@@ -281,93 +299,41 @@ Educational Use Only
 # Session State Initialization
 # =========================================================
 
-# ---------------------------------------------------------
-# RAG Chain
-# ---------------------------------------------------------
-
 if "rag" not in st.session_state:
     st.session_state.rag = None
-
-# ---------------------------------------------------------
-# Uploaded Documents
-# ---------------------------------------------------------
 
 if "documents" not in st.session_state:
     st.session_state.documents = []
 
-# ---------------------------------------------------------
-# Split Chunks
-# ---------------------------------------------------------
-
 if "chunks" not in st.session_state:
     st.session_state.chunks = []
-
-# ---------------------------------------------------------
-# Retrieved Documents
-# ---------------------------------------------------------
 
 if "retrieved_docs" not in st.session_state:
     st.session_state.retrieved_docs = []
 
-# ---------------------------------------------------------
-# Chat History
-# ---------------------------------------------------------
-
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
-# ---------------------------------------------------------
-# Database Ready Flag
-# ---------------------------------------------------------
 
 if "database_ready" not in st.session_state:
     st.session_state.database_ready = False
 
-# ---------------------------------------------------------
-# Current PDF Name
-# ---------------------------------------------------------
-
 if "pdf_name" not in st.session_state:
     st.session_state.pdf_name = ""
-
-# ---------------------------------------------------------
-# Current Vector Database
-# ---------------------------------------------------------
 
 if "vector_db" not in st.session_state:
     st.session_state.vector_db = ""
 
-# ---------------------------------------------------------
-# Current Embedding Model
-# ---------------------------------------------------------
-
 if "embedding_model" not in st.session_state:
     st.session_state.embedding_model = ""
-
-# ---------------------------------------------------------
-# Current LLM Provider
-# ---------------------------------------------------------
 
 if "provider" not in st.session_state:
     st.session_state.provider = ""
 
-# ---------------------------------------------------------
-# Current LLM Model
-# ---------------------------------------------------------
-
 if "llm_model" not in st.session_state:
     st.session_state.llm_model = ""
 
-# ---------------------------------------------------------
-# Report Summary
-# ---------------------------------------------------------
-
 if "report_summary" not in st.session_state:
     st.session_state.report_summary = ""
-
-# ---------------------------------------------------------
-# Questions for Doctor
-# ---------------------------------------------------------
 
 if "doctor_questions" not in st.session_state:
     st.session_state.doctor_questions = ""
@@ -379,24 +345,15 @@ if "doctor_questions" not in st.session_state:
 
 if build_database:
 
-    # -----------------------------------------------------
-    # Check PDF Upload
-    # -----------------------------------------------------
-
     if uploaded_pdf is None:
 
         st.warning("Please upload a medical report first.")
 
     else:
 
-        # -------------------------------------------------
-        # Save Uploaded PDF
-        # -------------------------------------------------
-
         data_folder = Path("data")
         data_folder.mkdir(exist_ok=True)
 
-        # Remove previous reports
         for file in data_folder.glob("*.pdf"):
             file.unlink()
 
@@ -405,140 +362,59 @@ if build_database:
         with open(pdf_path, "wb") as f:
             f.write(uploaded_pdf.getbuffer())
 
-        # -------------------------------------------------
-        # Progress Bar
-        # -------------------------------------------------
-
         progress = st.progress(0)
-
         status = st.empty()
 
         try:
 
-            # =============================================
-            # Step 1 : Load PDF
-            # =============================================
-
-            status.info("📄 Loading Medical Report...")
-
+            status.info("Loading medical report...")
             loader = PDFLoader(str(pdf_path))
-
             documents = loader.load()
-
             progress.progress(15)
 
-            # =============================================
-            # Step 2 : Split Report
-            # =============================================
-
-            status.info("✂ Splitting Report into Chunks...")
-
+            status.info("Splitting report into chunks...")
             splitter = DocumentSplitter(
-
                 chunk_size=chunk_size,
-
                 chunk_overlap=chunk_overlap
-
             )
-
             chunks = splitter.split(documents)
-
             progress.progress(35)
 
-            # =============================================
-            # Step 3 : Embeddings
-            # =============================================
-
-            status.info(" Loading Embedding Model...")
-
-            embedding = EmbeddingModel(
-
-                embedding_model
-
-            ).get_embedding_model()
-
+            status.info("Loading embedding model...")
+            embedding = EmbeddingModel(embedding_model).get_embedding_model()
             progress.progress(55)
 
-            # =============================================
-            # Step 4 : Vector Database
-            # =============================================
-
-            status.info(
-                f"🗄 Creating {vector_db} Database..."
-            )
-
-            vectorstore = VectorStore(
-
-                embedding
-
-            )
-
-            db = vectorstore.create(
-
-                chunks,
-
-                db_type=vector_db
-
-            )
-
+            status.info(f"Creating {vector_db} database...")
+            vectorstore = VectorStore(embedding)
+            db = vectorstore.create(chunks, db_type=vector_db)
             progress.progress(75)
 
-            # =============================================
-            # Step 5 : Initialize RAG
-            # =============================================
-
-            status.info("🤖 Initializing AI Assistant...")
-
+            status.info("Initializing assistant...")
             rag = RAGChain(
-
                 vector_db=db,
-
                 provider=provider,
-
                 model_name=model_name
-
             )
-
             progress.progress(100)
 
-            # =============================================
-            # Save Session
-            # =============================================
-
             st.session_state.rag = rag
-
             st.session_state.documents = documents
-
             st.session_state.chunks = chunks
-
             st.session_state.database_ready = True
-
             st.session_state.pdf_name = uploaded_pdf.name
-
             st.session_state.vector_db = vector_db
-
             st.session_state.embedding_model = embedding_model
-
             st.session_state.provider = provider
-
             st.session_state.llm_model = model_name
 
-            status.success(
-                "AI Medico Bot is Ready!"
-            )
-
-            st.success(
-                f"Successfully processed {uploaded_pdf.name}"
-            )
-
-            st.balloons()
+            status.success("Ready.")
+            st.success(f"Processed {uploaded_pdf.name}")
 
             progress.empty()
 
         except Exception as e:
 
             st.error(f"Error : {e}")
-
             progress.empty()
 
 # =========================================================
@@ -547,91 +423,41 @@ if build_database:
 
 if st.session_state.database_ready:
 
-    st.divider()
-
-    st.subheader("📊 Document Statistics")
-
-    # -----------------------------------------------------
-    # Metrics
-    # -----------------------------------------------------
+    st.markdown('<div class="panel-tab">Chart Summary</div>', unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-
-        st.metric(
-
-            label="📄 Pages",
-
-            value=len(st.session_state.documents)
-
-        )
+        st.metric("Pages", len(st.session_state.documents))
 
     with col2:
-
-        st.metric(
-
-            label="✂️ Chunks",
-
-            value=len(st.session_state.chunks)
-
-        )
+        st.metric("Chunks", len(st.session_state.chunks))
 
     with col3:
-
-        st.metric(
-
-            label="🗄️ Vector DB",
-
-            value=st.session_state.vector_db
-
-        )
+        st.metric("Vector DB", st.session_state.vector_db)
 
     with col4:
-
-        st.metric(
-
-            label="🤖 LLM",
-
-            value=st.session_state.provider
-
-        )
-
-    st.divider()
-
-    # -----------------------------------------------------
-    # Additional Information
-    # -----------------------------------------------------
+        st.metric("LLM", st.session_state.provider)
 
     col5, col6 = st.columns(2)
 
     with col5:
-
         st.info(
 f"""
-### 📄 Medical Report
-
-**File Name**
+**Report File**
 
 {st.session_state.pdf_name}
-
 """
         )
 
     with col6:
-
         st.info(
 f"""
-### ⚙️ Configuration
+**Configuration**
 
-**Embedding Model**
+Embedding — {st.session_state.embedding_model}
 
-{st.session_state.embedding_model}
-
-**LLM Model**
-
-{st.session_state.llm_model}
-
+LLM — {st.session_state.llm_model}
 """
         )
 
@@ -640,51 +466,34 @@ f"""
 # Medical Report Summary
 # =========================================================
 
-st.divider()
-
-st.subheader("📄 Medical Report Summary")
-
-st.caption(
-    "Generate a simple summary of the uploaded medical report."
-)
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown('<div class="panel-tab">Findings</div>', unsafe_allow_html=True)
+st.markdown('<div class="panel-caption">Generate a plain-language summary of the uploaded report.</div>', unsafe_allow_html=True)
 
 generate_summary = st.button(
-    "📋 Generate Summary",
+    "Generate Summary",
     use_container_width=True
 )
 
 if generate_summary:
 
     if not st.session_state.database_ready:
-
-        st.warning(
-            "Please build the database first."
-        )
+        st.warning("Please build the database first.")
 
     else:
 
-        with st.spinner(
-            "Generating report summary..."
-        ):
+        with st.spinner("Generating summary..."):
 
             try:
-
                 summary = st.session_state.rag.summarize()
-
                 st.session_state.report_summary = summary
 
             except Exception as e:
-
                 st.error(e)
-
-# ---------------------------------------------------------
-# Display Summary
-# ---------------------------------------------------------
 
 if st.session_state.report_summary:
 
-    st.success("Summary Generated Successfully")
-
+    st.success("Summary generated")
     st.write(st.session_state.report_summary)
 
 
@@ -692,58 +501,34 @@ if st.session_state.report_summary:
 # Medical Term Explanation
 # =========================================================
 
-st.divider()
-
-st.subheader("🩺 Medical Term Explanation")
-
-st.caption(
-    "Enter a medical term to understand its meaning in simple language."
-)
-
-# ---------------------------------------------------------
-# Medical Term Input
-# ---------------------------------------------------------
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown('<div class="panel-tab">Term Lookup</div>', unsafe_allow_html=True)
+st.markdown('<div class="panel-caption">Enter a medical term to understand its meaning in simple language.</div>', unsafe_allow_html=True)
 
 medical_term = st.text_input(
     "Medical Term",
-    placeholder="Example: Hemoglobin, RBC, Creatinine..."
+    placeholder="Example: Hemoglobin, RBC, Creatinine...",
+    label_visibility="collapsed"
 )
-
-# ---------------------------------------------------------
-# Explain Button
-# ---------------------------------------------------------
 
 explain_term = st.button(
-    "🔍 Explain Medical Term",
+    "Explain Term",
     use_container_width=True
 )
-
-# ---------------------------------------------------------
-# Generate Explanation
-# ---------------------------------------------------------
 
 if explain_term:
 
     if not st.session_state.database_ready:
-
-        st.warning(
-            "Please build the database first."
-        )
+        st.warning("Please build the database first.")
 
     elif medical_term.strip() == "":
-
-        st.warning(
-            "Please enter a medical term."
-        )
+        st.warning("Please enter a medical term.")
 
     else:
 
-        with st.spinner(
-            "Searching medical report..."
-        ):
+        with st.spinner("Searching report..."):
 
             try:
-
                 answer, docs = st.session_state.rag.explain_term(
                     medical_term,
                     k=top_k
@@ -751,142 +536,72 @@ if explain_term:
 
                 st.session_state.retrieved_docs = docs
 
-                st.success("Explanation Generated")
-
+                st.success("Explanation generated")
                 st.write(answer)
 
             except Exception as e:
-
                 st.error(e)
 
 # =========================================================
 # Medical Q&A
 # =========================================================
 
-st.divider()
-
-st.subheader("💬 Chat with Medical Report")
-
-st.caption(
-    "Ask any question related to the uploaded medical report."
-)
-
-# ---------------------------------------------------------
-# Question Input
-# ---------------------------------------------------------
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown('<div class="panel-tab">Consultation Log</div>', unsafe_allow_html=True)
+st.markdown('<div class="panel-caption">Ask any question related to the uploaded report.</div>', unsafe_allow_html=True)
 
 question = st.text_input(
     "Ask your question",
-    placeholder="Example: What is Hemoglobin? Explain my cholesterol level."
+    placeholder="Example: What is Hemoglobin? Explain my cholesterol level.",
+    label_visibility="collapsed"
 )
-
-# ---------------------------------------------------------
-# Ask Button
-# ---------------------------------------------------------
 
 ask_question = st.button(
-    "🤖 Ask AI",
+    "Ask",
     use_container_width=True
 )
-
-# ---------------------------------------------------------
-# Generate Answer
-# ---------------------------------------------------------
 
 if ask_question:
 
     if not st.session_state.database_ready:
-
-        st.warning(
-            "Please build the database first."
-        )
+        st.warning("Please build the database first.")
 
     elif question.strip() == "":
-
-        st.warning(
-            "Please enter a question."
-        )
+        st.warning("Please enter a question.")
 
     else:
 
-        with st.spinner(
-            "Analyzing medical report..."
-        ):
+        with st.spinner("Analyzing report..."):
 
             try:
-
                 start = time.time()
 
                 answer, docs = st.session_state.rag.ask(
-
                     question,
-
                     k=top_k
-
                 )
 
                 end = time.time()
-
                 response_time = end - start
-
-                # Save Retrieved Documents
 
                 st.session_state.retrieved_docs = docs
 
-                # Save Chat History
-
-                st.session_state.messages.append(
-
-                    {
-
-                        "role": "user",
-
-                        "content": question
-
-                    }
-
-                )
-
-                st.session_state.messages.append(
-
-                    {
-
-                        "role": "assistant",
-
-                        "content": answer
-
-                    }
-
-                )
+                st.session_state.messages.append({"role": "user", "content": question})
+                st.session_state.messages.append({"role": "assistant", "content": answer})
 
                 st.success("Answer")
-
                 st.write(answer)
-
-                st.caption(
-
-                    f"⚡ Response Time : {response_time:.2f} sec"
-
-                )
+                st.caption(f"Response time — {response_time:.2f}s")
 
             except Exception as e:
-
                 st.error(e)
-
-# ---------------------------------------------------------
-# Chat History
-# ---------------------------------------------------------
 
 if len(st.session_state.messages) > 0:
 
-    st.divider()
-
-    st.subheader("💬 Conversation")
+    st.markdown('<div class="panel-tab">Conversation</div>', unsafe_allow_html=True)
 
     for message in st.session_state.messages:
-
         with st.chat_message(message["role"]):
-
             st.markdown(message["content"])
 
 
@@ -896,106 +611,60 @@ if len(st.session_state.messages) > 0:
 
 if len(st.session_state.retrieved_docs) > 0:
 
-    st.divider()
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="panel-tab">Retrieved Context</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-caption">Chunks retrieved from the vector database and provided to the model.</div>', unsafe_allow_html=True)
 
-    st.subheader("📚 Retrieved Context")
+    for index, doc in enumerate(st.session_state.retrieved_docs, start=1):
 
-    st.caption(
-        "These document chunks were retrieved from the vector database and provided to the AI model."
-    )
+        page = doc.metadata.get("page", "Unknown")
+        source = doc.metadata.get("source", "Unknown")
 
-    # -----------------------------------------------------
-    # Display Retrieved Chunks
-    # -----------------------------------------------------
-
-    for index, doc in enumerate(
-        st.session_state.retrieved_docs,
-        start=1
-    ):
-
-        page = doc.metadata.get(
-            "page",
-            "Unknown"
-        )
-
-        source = doc.metadata.get(
-            "source",
-            "Unknown"
-        )
-
-        with st.expander(
-            f"📄 Chunk {index} | Page {page}"
-        ):
+        with st.expander(f"Exhibit {index:02d} — Page {page}"):
 
             col1, col2 = st.columns(2)
 
             with col1:
-
-                st.metric(
-                    "Page Number",
-                    page
-                )
+                st.metric("Page", page)
 
             with col2:
+                st.metric("Characters", len(doc.page_content))
 
-                st.metric(
-                    "Characters",
-                    len(doc.page_content)
-                )
-
-            st.markdown("### 📖 Retrieved Text")
-
+            st.markdown("**Retrieved Text**")
             st.write(doc.page_content)
 
             st.markdown("---")
-
-            st.markdown("### 📌 Metadata")
-
+            st.markdown("**Metadata**")
             st.json(doc.metadata)
 
-    # -----------------------------------------------------
-    # Source Pages
-    # -----------------------------------------------------
-
-    st.divider()
-
-    st.subheader("📄 Source Pages")
+    st.markdown('<div class="panel-tab">Source Pages</div>', unsafe_allow_html=True)
 
     pages = sorted(
-        {
-            str(
-                doc.metadata.get(
-                    "page",
-                    "Unknown"
-                )
-            )
-            for doc in st.session_state.retrieved_docs
-        }
+        {str(doc.metadata.get("page", "Unknown")) for doc in st.session_state.retrieved_docs}
     )
 
-    st.success(
-        "Answer Generated Using Page(s): "
-        + ", ".join(pages)
-    )
+    chips = "".join(f'<span class="ref-chip">p. {p}</span>' for p in pages)
+
+    st.markdown(f'<div class="ref-row">{chips}</div>', unsafe_allow_html=True)
 
 # =========================================================
 # Medical Disclaimer
 # =========================================================
 
-st.divider()
+st.markdown("<br>", unsafe_allow_html=True)
 
 st.warning(
     """
-⚠ **Medical Disclaimer**
+**Medical Disclaimer**
 
-AI Medico Bot is intended for **educational and informational purposes only**.
+AI Medico Bot is intended for educational and informational purposes only.
 
-• It does **not** diagnose diseases.
-• It does **not** prescribe medications.
-• It does **not** replace professional medical advice.
-• Always consult a qualified healthcare professional for medical diagnosis and treatment.
+- It does not diagnose diseases.
+- It does not prescribe medications.
+- It does not replace professional medical advice.
+- Always consult a qualified healthcare professional for diagnosis and treatment.
 
-The generated responses are based only on the uploaded medical report and the selected Large Language Model.
+Generated responses are based only on the uploaded report and the selected model.
 """
 )
 
@@ -1003,122 +672,48 @@ The generated responses are based only on the uploaded medical report and the se
 # Footer
 # =========================================================
 
-st.divider()
-
 col1, col2, col3 = st.columns(3)
 
-# ---------------------------------------------------------
-# Technology Stack
-# ---------------------------------------------------------
-
 with col1:
-
     st.markdown(
         """
-### 🚀 Technology Stack
+**Technology Stack**
 
-- Streamlit
-- LangChain
-- Python
-- HuggingFace
+Streamlit · LangChain · Python · HuggingFace
 """
     )
-
-# ---------------------------------------------------------
-# AI Components
-# ---------------------------------------------------------
 
 with col2:
-
     st.markdown(
         f"""
-### 🤖 AI Components
+**AI Components**
 
-**LLM Provider**
+Provider — {st.session_state.provider}
 
-{st.session_state.provider}
+Model — {st.session_state.llm_model}
 
-**LLM Model**
-
-{st.session_state.llm_model}
-
-**Embedding**
-
-{st.session_state.embedding_model}
+Embedding — {st.session_state.embedding_model}
 """
     )
-
-# ---------------------------------------------------------
-# Vector Database
-# ---------------------------------------------------------
 
 with col3:
-
     st.markdown(
         f"""
-### 🗄️ Vector Database
+**Vector Database**
 
-**Database**
+Database — {st.session_state.vector_db}
 
-{st.session_state.vector_db}
-
-**Top K Retrieval**
-
-{top_k}
+Top K — {top_k}
 """
     )
 
-st.divider()
-
-# =========================================================
-# Bottom Footer
-# =========================================================
-
 st.markdown(
-"""
-<div style="text-align:center; color:gray;">
-
-<h3>🩺 AI Medico Bot</h3>
-
-<p>
-Intelligent Medical Report Assistant using
-<b>Retrieval-Augmented Generation (RAG)</b>
-</p>
-
-<p>
-
-🤖 Google Gemini &nbsp; | &nbsp;
-🦙 Ollama &nbsp; | &nbsp;
-🗄️ FAISS & ChromaDB &nbsp; | &nbsp;
-🧠 HuggingFace Embeddings
-
-</p>
-
-<hr>
-
-<p>
-
-Built using
-
-<b>Streamlit</b> •
-<b>LangChain</b> •
-<b>Python</b>
-
-</p>
-
-<p>
-
-Developed by <b>Ipshita Bhardwaj</b>
-
-</p>
-
-<p>
-
-Version 1.0
-
-</p>
-
+    """
+<div class="colophon">
+    AI Medico Bot &nbsp;·&nbsp; Retrieval-Augmented Generation &nbsp;·&nbsp;
+    Gemini &nbsp;·&nbsp; Ollama &nbsp;·&nbsp; FAISS &nbsp;·&nbsp; ChromaDB<br>
+    Developed by Ipshita Bhardwaj &nbsp;·&nbsp; v1.0
 </div>
 """,
-unsafe_allow_html=True
+    unsafe_allow_html=True
 )
